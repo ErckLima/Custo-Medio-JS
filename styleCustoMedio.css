@@ -1,0 +1,26 @@
+body{
+    background-color: aliceblue;
+}
+table{
+    width: 600px;
+}
+
+#Totais{
+    display: flex;
+    /* padding: 50px; */
+    margin: 10px;
+}
+
+#Totais p{
+    display: flex;
+    /* padding: 50px; */
+    margin: 10%;
+}
+
+#Tabela{
+    margin: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background-color: grey;
+}

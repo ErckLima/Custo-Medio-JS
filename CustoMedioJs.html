@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custo Médio Sisloc</title>
+    <link rel="stylesheet" href="styleCustoMedio.css">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Custo Médio Sisloc</h2>
+    <label>Tipo:
+        <select id="tipo">
+            <option value="Entrada">Entrada</option>
+            <option value="Saída">Saída</option>
+        </select>
+    </label>
+    <label>Quantidade: <input type="number" id="quantidade" min="1"></label>
+    <label>Valor Unitário: <input type="number" id="valorUnitario" step="0.01" min="0"></label>
+    <button onclick="adicionarMovimentacao()">Adicionar</button>
+    <button onclick="removerUltimo()">Remover Último</button>
+    <button onclick="salvar()">Salvar</button>
+    
+    <div id="Tabela">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Valor Unitário</th>
+                    <th>Total da Movimentação</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaCorpo"></tbody>
+        </table>
+    </div>
+    
+    
+    <div id="Totais">
+        <p>Valor Total: <span id="valorTotal">0</span></p>
+        <p>Quantidade Total: <span id="quantidadeTotal">0</span></p>
+        <p>Custo Médio: <span id="custoMedio">0</span></p>
+    </div>
+    
+    <script>
+        let valorTotal = 0;
+        let quantidadeTotal = 0;
+        let custoMedio = 0;
+
+        function adicionarMovimentacao() {
+            const tipo = document.getElementById("tipo").value;
+            const quantidade = parseInt(document.getElementById("quantidade").value);
+            let valorUnitario = parseFloat(document.getElementById("valorUnitario").value);
+            
+            if (isNaN(quantidade) || quantidade <= 0) {
+                alert("Informe uma quantidade válida.");
+                return;
+            }
+            
+            if (tipo === "Entrada") {
+                if (isNaN(valorUnitario) || valorUnitario <= 0) {
+                    alert("Informe um valor unitário válido.");
+                    return;
+                }
+                let totalMovimentacao = quantidade * valorUnitario;
+                valorTotal += totalMovimentacao;
+                quantidadeTotal += quantidade;
+                custoMedio = valorTotal / quantidadeTotal;
+            } else {
+                if (quantidade > quantidadeTotal) {
+                    alert("Quantidade insuficiente em estoque.");
+                    return;
+                }
+                valorUnitario = custoMedio;
+                let totalMovimentacao = quantidade * valorUnitario;
+                valorTotal -= totalMovimentacao;
+                quantidadeTotal -= quantidade;
+                if (quantidadeTotal === 0) {
+                    valorTotal = 0;
+                    custoMedio = 0;
+                }
+            }
+
+            atualizarTabela(tipo, quantidade, valorUnitario);
+            atualizarTotais();
+        }
+        
+        function atualizarTabela(tipo, quantidade, valorUnitario) {
+            const tabela = document.getElementById("tabelaCorpo");
+            const linha = tabela.insertRow();
+            linha.insertCell(0).innerText = tipo;
+            linha.insertCell(1).innerText = quantidade;
+            linha.insertCell(2).innerText = valorUnitario.toFixed(2);
+            linha.insertCell(3).innerText = (quantidade * valorUnitario).toFixed(2);
+        }
+
+        function atualizarTotais() {
+            document.getElementById("valorTotal").innerText = valorTotal.toFixed(2);
+            document.getElementById("quantidadeTotal").innerText = quantidadeTotal;
+            document.getElementById("custoMedio").innerText = custoMedio.toFixed(2);
+        }
+
+        function removerUltimo() {
+            const tabela = document.getElementById("tabelaCorpo");
+            if (tabela.rows.length > 0) {
+                tabela.deleteRow(tabela.rows.length - 1);
+            }
+        }
+        
+        function salvar() {
+            alert("Registros salvos com sucesso!");
+        }
+    </script>
+</body>
+</html>
