@@ -1,120 +1,185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custo Médio Sisloc</title>
-    <link rel="stylesheet" href="styleCustoMedio.css">
-    <style>
-        body { font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custo Médio Sisloc</title>
+  <link rel="stylesheet" href="styleCustoMedio.css">
 </head>
 <body>
-    <h2>Custo Médio Sisloc</h2>
-    <label>Tipo:
+<main>
+  <header>
+    <h1>Custo Médio sisloc<span>•</span></h1>
+    <p>Simulador de custo médio ponderado móvel: lance entradas e saídas e acompanhe o saldo a cada movimentação.</p>
+  </header>
+
+  <section class="painel">
+    <form id="form">
+      <label>Tipo
         <select id="tipo">
-            <option value="Entrada">Entrada</option>
-            <option value="Saída">Saída</option>
+          <option value="Entrada">Entrada</option>
+          <option value="Saída">Saída</option>
         </select>
-    </label>
-    <label>Quantidade: <input type="number" id="quantidade" min="1"></label>
-    <label>Valor Unitário: <input type="number" id="valorUnitario" step="0.01" min="0"></label>
-    <button onclick="adicionarMovimentacao()">Adicionar</button>
-    <button onclick="removerUltimo()">Remover Último</button>
-    <button onclick="salvar()">Salvar</button>
-    
-    <div id="Tabela">
-        <table>
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Valor Unitário</th>
-                    <th>Total da Movimentação</th>
-                </tr>
-            </thead>
-            <tbody id="tabelaCorpo"></tbody>
-        </table>
+      </label>
+      <label>Quantidade
+        <input type="number" id="quantidade" min="0" step="any" required>
+      </label>
+      <label>Valor unitário (R$)
+        <input type="number" id="valorUnitario" min="0" step="any" placeholder="0,00">
+      </label>
+      <button type="submit" class="primario">Adicionar</button>
+    </form>
+    <p class="msg" id="msg"></p>
+  </section>
+
+  <section class="totais">
+    <div class="total"><small>Saldo em quantidade</small><strong id="saldoQtd">0</strong></div>
+    <div class="total"><small>Saldo em valor</small><strong id="saldoValor">R$ 0,00</strong></div>
+    <div class="total"><small>Custo médio</small><strong id="custoMedio">R$ 0,0000</strong></div>
+  </section>
+
+  <section class="painel">
+    <div class="acoes">
+      <h2>Movimentações</h2>
+      <div>
+        <button type="button" id="btnRemoverUltimo">Remover último</button>
+        <button type="button" id="btnExportar">Exportar CSV</button>
+        <button type="button" id="btnLimpar">Limpar tudo</button>
+      </div>
     </div>
-    
-    
-    <div id="Totais">
-        <p>Valor Total: <span id="valorTotal">0</span></p>
-        <p>Quantidade Total: <span id="quantidadeTotal">0</span></p>
-        <p>Custo Médio: <span id="custoMedio">0</span></p>
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Valor unit.</th>
+            <th>Total mov.</th>
+            <th class="saldo">Saldo qtd.</th>
+            <th class="saldo">Saldo valor</th>
+            <th class="saldo">Custo médio</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabelaCorpo"></tbody>
+      </table>
     </div>
-    
-    <script>
-        let valorTotal = 0;
-        let quantidadeTotal = 0;
-        let custoMedio = 0;
+  </section>
 
-        function adicionarMovimentacao() {
-            const tipo = document.getElementById("tipo").value;
-            const quantidade = parseInt(document.getElementById("quantidade").value);
-            let valorUnitario = parseFloat(document.getElementById("valorUnitario").value);
-            
-            if (isNaN(quantidade) || quantidade <= 0) {
-                alert("Informe uma quantidade válida.");
-                return;
-            }
-            
-            if (tipo === "Entrada") {
-                if (isNaN(valorUnitario) || valorUnitario <= 0) {
-                    alert("Informe um valor unitário válido.");
-                    return;
-                }
-                let totalMovimentacao = quantidade * valorUnitario;
-                valorTotal += totalMovimentacao;
-                quantidadeTotal += quantidade;
-                custoMedio = valorTotal / quantidadeTotal;
-            } else {
-                if (quantidade > quantidadeTotal) {
-                    alert("Quantidade insuficiente em estoque.");
-                    return;
-                }
-                valorUnitario = custoMedio;
-                let totalMovimentacao = quantidade * valorUnitario;
-                valorTotal -= totalMovimentacao;
-                quantidadeTotal -= quantidade;
-                if (quantidadeTotal === 0) {
-                    valorTotal = 0;
-                    custoMedio = 0;
-                }
-            }
+  <footer>As movimentações ficam salvas neste navegador. Veja <a href="https://github.com/ErckLima/Custo-Medio-JS/blob/main/COMO-FUNCIONA.md" target="_blank">como funciona o cálculo</a>.</footer>
+</main>
 
-            atualizarTabela(tipo, quantidade, valorUnitario);
-            atualizarTotais();
-        }
-        
-        function atualizarTabela(tipo, quantidade, valorUnitario) {
-            const tabela = document.getElementById("tabelaCorpo");
-            const linha = tabela.insertRow();
-            linha.insertCell(0).innerText = tipo;
-            linha.insertCell(1).innerText = quantidade;
-            linha.insertCell(2).innerText = valorUnitario.toFixed(2);
-            linha.insertCell(3).innerText = (quantidade * valorUnitario).toFixed(2);
-        }
+<script src="custoMedio.js"></script>
+<script>
+  const CHAVE = "custoMedioSisloc.movimentacoes";
+  const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const moeda4 = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  const numero = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 4 });
 
-        function atualizarTotais() {
-            document.getElementById("valorTotal").innerText = valorTotal.toFixed(2);
-            document.getElementById("quantidadeTotal").innerText = quantidadeTotal;
-            document.getElementById("custoMedio").innerText = custoMedio.toFixed(2);
-        }
+  const $ = id => document.getElementById(id);
+  let movimentacoes = carregar();
 
-        function removerUltimo() {
-            const tabela = document.getElementById("tabelaCorpo");
-            if (tabela.rows.length > 0) {
-                tabela.deleteRow(tabela.rows.length - 1);
-            }
-        }
-        
-        function salvar() {
-            alert("Registros salvos com sucesso!");
-        }
-    </script>
+  function carregar() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; }
+  }
+  function salvar() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(movimentacoes)); } catch { /* armazenamento indisponível */ }
+  }
+  function mensagem(texto) { $("msg").textContent = texto || ""; }
+
+  // Aplica uma alteração na lista só se o kardex continuar válido.
+  function aplicar(novaLista) {
+    const r = CustoMedio.calcularKardex(novaLista);
+    if (r.erro) { mensagem(r.erro); return false; }
+    movimentacoes = novaLista;
+    salvar();
+    render();
+    mensagem("");
+    return true;
+  }
+
+  function render() {
+    const r = CustoMedio.calcularKardex(movimentacoes);
+    const corpo = $("tabelaCorpo");
+    if (!r.linhas.length) {
+      corpo.innerHTML = `<tr><td colspan="9" class="vazio">Nenhuma movimentação lançada.</td></tr>`;
+    } else {
+      corpo.innerHTML = r.linhas.map((l, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td class="tipo-${l.tipo}">${l.tipo}</td>
+          <td>${numero.format(l.quantidade)}</td>
+          <td>${moeda4.format(l.valorUnitario)}</td>
+          <td>${moeda.format(l.totalMovimentacao)}</td>
+          <td class="saldo">${numero.format(l.saldoQtd)}</td>
+          <td class="saldo">${moeda.format(l.saldoValor)}</td>
+          <td class="saldo cm">${moeda4.format(l.custoMedio)}</td>
+          <td><button type="button" class="remover" data-i="${i}" title="Remover esta linha">✕</button></td>
+        </tr>`).join("");
+    }
+    $("saldoQtd").textContent = numero.format(r.saldoQtd || 0);
+    $("saldoValor").textContent = moeda.format(r.saldoValor || 0);
+    $("custoMedio").textContent = moeda4.format(r.custoMedio || 0);
+  }
+
+  function atualizarCampoValor() {
+    const saida = $("tipo").value === "Saída";
+    $("valorUnitario").disabled = saida;
+    $("valorUnitario").placeholder = saida ? "usa o custo médio" : "0,00";
+    if (saida) $("valorUnitario").value = "";
+  }
+
+  $("tipo").addEventListener("change", atualizarCampoValor);
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const tipo = $("tipo").value;
+    const quantidade = parseFloat($("quantidade").value);
+    const valorUnitario = parseFloat($("valorUnitario").value || "0");
+    const erro = CustoMedio.validarMovimentacao(tipo, quantidade, valorUnitario);
+    if (erro) { mensagem(erro); return; }
+
+    const mov = tipo === "Entrada" ? { tipo, quantidade, valorUnitario } : { tipo, quantidade };
+    if (aplicar([...movimentacoes, mov])) {
+      $("quantidade").value = "";
+      $("valorUnitario").value = "";
+      $("quantidade").focus();
+    }
+  });
+
+  $("tabelaCorpo").addEventListener("click", e => {
+    const btn = e.target.closest(".remover");
+    if (!btn) return;
+    const i = Number(btn.dataset.i);
+    const nova = movimentacoes.filter((_, j) => j !== i);
+    if (!aplicar(nova)) mensagem(`Não é possível remover a linha ${i + 1}: uma saída posterior ficaria sem saldo.`);
+  });
+
+  $("btnRemoverUltimo").addEventListener("click", () => {
+    if (movimentacoes.length) aplicar(movimentacoes.slice(0, -1));
+  });
+
+  $("btnLimpar").addEventListener("click", () => {
+    if (movimentacoes.length && confirm("Apagar todas as movimentações?")) aplicar([]);
+  });
+
+  $("btnExportar").addEventListener("click", () => {
+    const r = CustoMedio.calcularKardex(movimentacoes);
+    if (!r.linhas.length) { mensagem("Nada para exportar."); return; }
+    const n = v => v.toFixed(4).replace(".", ",");
+    const linhas = [["#", "Tipo", "Quantidade", "Valor unitario", "Total movimentacao", "Saldo qtd", "Saldo valor", "Custo medio"]]
+      .concat(r.linhas.map((l, i) => [i + 1, l.tipo, n(l.quantidade), n(l.valorUnitario), n(l.totalMovimentacao), n(l.saldoQtd), n(l.saldoValor), n(l.custoMedio)]));
+    const csv = "﻿" + linhas.map(c => c.join(";")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "custo-medio.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  atualizarCampoValor();
+  render();
+</script>
 </body>
 </html>
